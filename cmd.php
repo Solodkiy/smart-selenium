@@ -1,11 +1,12 @@
 <?php
 
 const DOWNLOAD_DIR = 'Downloads';
+const VERSION = '0.2.0';
 
 function render($status, $content)
 {
     echo '<div id="status">'.$status.'</div>'. "\n";
-    echo '<div id="content">'.base64_encode($content).'</div>';
+    echo '<div id="content">'.htmlentities($content).'</div>';
     exit;
 }
 
@@ -18,22 +19,26 @@ $command = $_GET['cmd'] ?? null;
 
 switch ($command) {
     case 'version':
-        render('success', '0.1.0');
+        render('success', VERSION);
         return;
-    case 'get_last_downloaded_file':
+    case 'get_names':
         $files = filterFiles(scandir(DOWNLOAD_DIR));
-        if (count($files)) {
-            $content = file_get_contents(DOWNLOAD_DIR.'/'.$files[0]);
+        render('success', json_encode($files));
+        return;
+    case 'get_by_name':
+        $name = $_GET['name'] ?? null;
+        if ($name) {
+            $content = file_get_contents(DOWNLOAD_DIR.'/'.$name);
             if ($content !== false) {
-                render('success', $content);
+                render('success', json_encode(['name' => $name, 'content' => base64_encode($content)]));
             } else {
                 render('error', 'file read error');
             }
         } else {
-            render('error', 'file not found');
+            render('error', 'Name param is empty');
         }
         return;
-    case 'clear_all':
+    case 'clear':
         $files = filterFiles(scandir(DOWNLOAD_DIR));
         foreach ($files as $file) {
             unlink(DOWNLOAD_DIR.'/'.$file);
