@@ -1,7 +1,7 @@
 <?php
 
 const DOWNLOAD_DIR = 'Downloads';
-const VERSION = '0.2.0';
+const VERSION = '0.2.1';
 
 function render($status, $content)
 {
@@ -22,6 +22,9 @@ switch ($command) {
         render('success', VERSION);
         return;
     case 'get_names':
+        if (!file_exists(DOWNLOAD_DIR)) {
+            mkdir(DOWNLOAD_DIR);
+        }
         $files = filterFiles(scandir(DOWNLOAD_DIR));
         render('success', json_encode($files));
         return;
